@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Máy Tính Lương OT</title>
+
+<style>
+
+*{
+box-sizing:border-box;
+font-family:Segoe UI,Arial
+}
+
+body{
+margin:0;
+background:linear-gradient(135deg,#3a7bd5,#00d2ff);
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh;
+padding:15px
+}
+
+.container{
+background:white;
+padding:25px;
+width:100%;
+max-width:420px;
+border-radius:16px;
+box-shadow:0 15px 40px rgba(0,0,0,.2)
+}
+
+h2{
+text-align:center;
+margin-bottom:20px
+}
+
+label{
+font-weight:600;
+font-size:14px
+}
+
+input{
+width:100%;
+padding:12px;
+margin:6px 0 12px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:16px
+}
+
+.row{
+display:flex;
+gap:6px
+}
+
+.row input{
+flex:1
+}
+
+button{
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer
+}
+
+.add{
+background:#eee;
+width:100%;
+margin-bottom:10px
+}
+
+.delete{
+background:#ff6b6b;
+color:white
+}
+
+.result{
+margin-top:20px;
+background:#f6f6f6;
+padding:15px;
+border-radius:12px
+}
+
+.big{
+font-size:20px;
+font-weight:bold;
+color:#2196f3
+}
+
+.formula{
+font-size:12px;
+color:#555;
+margin-top:6px
+}
+
+.checkbox{
+display:flex;
+align-items:center;
+gap:8px;
+margin:10px 0;
+font-size:14px;
+font-weight:600;
+}
+
+.checkbox{
+display:flex;
+align-items:center;
+gap:8px;
+}
+
+.checkbox input{
+width:auto;
+margin:0;
+padding:0;
+}   
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>💰 Máy Tính Lương OT</h2>
+
+<label>Lương cơ bản</label>
+<input id="luong"
+placeholder="VD: 6200000"
+onfocus="unformat(this)"
+onblur="formatMoney(this)"
+oninput="calc()">
+
+<div id="phuCapBox"></div>
+
+<button id="addIncome" class="add" onclick="addIncome()">➕ Thêm khoản thu nhập</button>
+
+<label>Số ngày công</label>
+<input id="ngay" placeholder="VD: 22" oninput="calc()">
+
+<label>Số giờ OT 150% (nhớ nhập dấu phẩy "," cho số thập phân - code lỏ khum nhâp dấu chấm "." đựt đou)</label>
+<input id="ot150" placeholder="VD: 50" oninput="calc()">
+
+<div id="otBox"></div>
+
+<button id="addOT" class="add" onclick="addOT()">➕ Thêm OT 200% / 300%</button>
+
+<div class="checkbox">
+<input type="checkbox" id="bhxh" checked onchange="calc()">
+<label for="bhxh">Có đóng BHXH tại công ty</label>
+</div>
+
+<div class="result">
+
+<p>Lương 1 giờ: <span id="hour">0</span> đ</p>
+
+<p>Tổng phụ cấp: <span id="pc">0</span> đ</p>
+
+<p>Tổng OT: <span id="ot">0</span> đ</p>
+
+<p>BHXH (10.5%): <span id="bh">0</span> đ</p>
+
+<p class="big">Lương thực lãnh: <span id="net">0</span> đ</p>
+
+<p class="formula" id="f1"></p>
+<p class="formula" id="f2"></p>
+
+</div>
+
+</div>
+
+<script>
+
+function num(v){
+
+if(!v) return 0
+
+v=v.replace(/\s/g,'')
+
+if(v.includes(',') && v.includes('.')){
+v=v.replace(/\./g,'').replace(',','.')
+}
+else if(v.includes(',')){
+v=v.replace(',','.')
+}
+else{
+v=v.replace(/\./g,'')
+}
+
+return parseFloat(v)||0
+
+}
+
+function vnd(v){
+return Math.round(v).toLocaleString("vi-VN")
+}
+
+function formatMoney(input){
+
+let n=num(input.value)
+
+if(n) input.value=vnd(n)
+
+calc()
+
+}
+
+function unformat(input){
+
+let n=num(input.value)
+
+if(n) input.value=n
+
+}
+
+
+
+/* phụ cấp */
+
+function addIncome(){
+
+let box=document.getElementById("phuCapBox")
+
+let d=document.createElement("div")
+
+d.className="row"
+
+d.innerHTML=`
+<input class="pc" placeholder="VD: 500000" oninput="calc()">
+<button class="delete" onclick="removeItem(this)">✖</button>
+`
+
+box.appendChild(d)
+
+}
+
+function removeItem(btn){
+
+btn.parentElement.remove()
+
+calc()
+
+}
+
+
+
+/* OT */
+
+function addOT(){
+
+let box=document.getElementById("otBox")
+
+if(!document.getElementById("ot200")){
+
+let d=document.createElement("div")
+
+d.className="row"
+
+d.innerHTML=`
+<input id="ot200" placeholder="Số giờ OT 200%" oninput="calc()">
+<button class="delete" onclick="removeOT(this)">✖</button>
+`
+
+box.appendChild(d)
+
+return
+
+}
+
+if(!document.getElementById("ot300")){
+
+let d=document.createElement("div")
+
+d.className="row"
+
+d.innerHTML=`
+<input id="ot300" placeholder="Số giờ OT 300%" oninput="calc()">
+<button class="delete" onclick="removeOT(this)">✖</button>
+`
+
+box.appendChild(d)
+
+document.getElementById("addOT").style.display="none"
+
+}
+
+}
+
+function removeOT(btn){
+
+btn.parentElement.remove()
+
+document.getElementById("addOT").style.display="block"
+
+calc()
+
+}
+
+
+
+/* tính lương */
+
+function calc(){
+
+let luong=num(document.getElementById("luong").value)
+let ngay=num(document.getElementById("ngay").value)
+
+if(!luong || !ngay) return
+
+let ot150=num(document.getElementById("ot150").value)
+let ot200=num(document.getElementById("ot200")?.value)
+let ot300=num(document.getElementById("ot300")?.value)
+
+let pc=[...document.querySelectorAll(".pc")]
+.reduce((s,e)=>s+num(e.value),0)
+
+let base = luong/ngay/8
+
+let ot = base*(ot150*1.5 + ot200*2 + ot300*3)
+
+let bh = 0
+
+if(document.getElementById("bhxh").checked){
+bh = luong*0.105
+}
+
+let net = luong + pc + ot - bh
+
+
+document.getElementById("hour").innerText=vnd(base)
+
+document.getElementById("pc").innerText=vnd(pc)
+
+document.getElementById("ot").innerText=vnd(ot)
+
+document.getElementById("bh").innerText=vnd(bh)
+
+document.getElementById("net").innerText=vnd(net)
+
+
+
+let otParts=[]
+
+if(ot150>0) otParts.push(`${ot150}×1.5`)
+if(ot200>0) otParts.push(`${ot200}×2`)
+if(ot300>0) otParts.push(`${ot300}×3`)
+
+let f1=""
+
+if(otParts.length>0){
+f1=`Tiền OT = (${vnd(luong)} / ${ngay} / 8) × (${otParts.join(" + ")}) = ${vnd(ot)}`
+}
+
+document.getElementById("f1").innerText=f1
+
+
+
+let parts=[vnd(luong)]
+
+if(pc>0) parts.push(vnd(pc))
+
+if(ot>0) parts.push(vnd(ot))
+
+let formula=`Lương thực lãnh = ${parts.join(" + ")}`
+
+if(bh>0){
+formula+=` − ${vnd(bh)}`
+}
+
+formula+=` = ${vnd(net)}`
+
+document.getElementById("f2").innerText=formula
+
+}
+
+</script>
+
+</body>
+</html>
