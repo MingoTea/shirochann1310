@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Máy Tính Lương</title>
 
 <style>
@@ -19,7 +20,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 min-height:100vh;
-padding:15px;
+padding:15px
 }
 
 .container{
@@ -28,13 +29,12 @@ padding:25px;
 width:100%;
 max-width:420px;
 border-radius:16px;
-box-shadow:0 15px 40px rgba(0,0,0,.2);
+box-shadow:0 15px 40px rgba(0,0,0,.2)
 }
 
 h2{
 text-align:center;
-margin-bottom:20px;
-font-size:22px
+margin-bottom:20px
 }
 
 label{
@@ -48,28 +48,7 @@ padding:12px;
 margin:6px 0 12px;
 border-radius:10px;
 border:1px solid #ccc;
-font-size:16px;
-}
-
-button{
-border:none;
-padding:10px;
-border-radius:8px;
-cursor:pointer;
-font-size:14px
-}
-
-.add{
-background:#eee;
-width:100%;
-margin-bottom:10px
-}
-
-.delete{
-background:#ff6b6b;
-color:white;
-margin-left:6px;
-padding:8px 10px
+font-size:16px
 }
 
 .row{
@@ -81,8 +60,22 @@ gap:6px
 flex:1
 }
 
-.section{
+button{
+border:none;
+padding:10px;
+border-radius:8px;
+cursor:pointer
+}
+
+.add{
+background:#eee;
+width:100%;
 margin-bottom:10px
+}
+
+.delete{
+background:#ff6b6b;
+color:white
 }
 
 .result{
@@ -101,26 +94,29 @@ color:#2196f3
 .formula{
 font-size:12px;
 color:#555;
-margin-top:6px;
-word-break:break-word
+margin-top:6px
 }
 
-@media (max-width:480px){
-
-h2{
-font-size:20px
+.checkbox{
+display:flex;
+align-items:center;
+gap:8px;
+margin:10px 0;
+font-size:14px;
+font-weight:600;
 }
 
-input{
-font-size:16px;
-padding:14px
+.checkbox{
+display:flex;
+align-items:center;
+gap:8px;
 }
 
-.big{
-font-size:22px
-}
-
-}
+.checkbox input{
+width:auto;
+margin:0;
+padding:0;
+}   
 
 </style>
 </head>
@@ -132,34 +128,39 @@ font-size:22px
 <h2>💰 Máy Tính Lương</h2>
 
 <label>Lương cơ bản</label>
-<input id="luong" onfocus="unformat(this)" onblur="formatMoney(this)" oninput="calc()">
+<input id="luong"
+placeholder="VD: 6200000"
+onfocus="unformat(this)"
+onblur="formatMoney(this)"
+oninput="calc()">
 
 <div id="phuCapBox"></div>
 
 <button id="addIncome" class="add" onclick="addIncome()">➕ Thêm khoản thu nhập</button>
 
-
 <label>Số ngày công</label>
-<input id="ngay" oninput="calc()">
+<input id="ngay" placeholder="VD: 22" oninput="calc()">
 
-
-<div class="section">
-
-<label>OT 150% (nhớ nhập dấu phẩy "," cho số thập phân - code lỏ khum nhâp dấu chấm "." đựt đou)</label>
-<input id="ot150" oninput="calc()">
-
-</div>
-
+<label>Số giờ OT 150% (nhớ nhập dấu phẩy "," cho số thập phân - code lỏ khum nhâp dấu chấm "." đựt đou)</label>
+<input id="ot150" placeholder="VD: 50" oninput="calc()">
 
 <div id="otBox"></div>
 
 <button id="addOT" class="add" onclick="addOT()">➕ Thêm OT 200% / 300%</button>
 
+<div class="checkbox">
+<input type="checkbox" id="bhxh" checked onchange="calc()">
+<label for="bhxh">Có đóng BHXH tại công ty</label>
+</div>
 
 <div class="result">
 
+<p>Lương 1 giờ: <span id="hour">0</span> đ</p>
+
 <p>Tổng phụ cấp: <span id="pc">0</span> đ</p>
+
 <p>Tổng OT: <span id="ot">0</span> đ</p>
+
 <p>BHXH (10.5%): <span id="bh">0</span> đ</p>
 
 <p class="big">Lương thực lãnh: <span id="net">0</span> đ</p>
@@ -172,8 +173,6 @@ font-size:22px
 </div>
 
 <script>
-
-const maxIncome=3
 
 function num(v){
 
@@ -218,35 +217,23 @@ if(n) input.value=n
 }
 
 
+
 /* phụ cấp */
 
 function addIncome(){
 
 let box=document.getElementById("phuCapBox")
 
-if(box.children.length>=maxIncome) return
-
 let d=document.createElement("div")
 
 d.className="row"
 
 d.innerHTML=`
-<input class="pc" placeholder="Khoản thu nhập" oninput="calc()">
+<input class="pc" placeholder="VD: 500000" oninput="calc()">
 <button class="delete" onclick="removeItem(this)">✖</button>
 `
 
 box.appendChild(d)
-
-toggleIncome()
-
-}
-
-function toggleIncome(){
-
-let box=document.getElementById("phuCapBox")
-
-document.getElementById("addIncome").style.display=
-box.children.length>=maxIncome?"none":"block"
 
 }
 
@@ -254,11 +241,10 @@ function removeItem(btn){
 
 btn.parentElement.remove()
 
-toggleIncome()
-
 calc()
 
 }
+
 
 
 /* OT */
@@ -274,7 +260,7 @@ let d=document.createElement("div")
 d.className="row"
 
 d.innerHTML=`
-<input id="ot200" placeholder="OT 200%" oninput="calc()">
+<input id="ot200" placeholder="Số giờ OT 200%" oninput="calc()">
 <button class="delete" onclick="removeOT(this)">✖</button>
 `
 
@@ -291,7 +277,7 @@ let d=document.createElement("div")
 d.className="row"
 
 d.innerHTML=`
-<input id="ot300" placeholder="OT 300%" oninput="calc()">
+<input id="ot300" placeholder="Số giờ OT 300%" oninput="calc()">
 <button class="delete" onclick="removeOT(this)">✖</button>
 `
 
@@ -305,8 +291,6 @@ document.getElementById("addOT").style.display="none"
 
 function removeOT(btn){
 
-let id=btn.previousElementSibling.id
-
 btn.parentElement.remove()
 
 document.getElementById("addOT").style.display="block"
@@ -314,6 +298,7 @@ document.getElementById("addOT").style.display="block"
 calc()
 
 }
+
 
 
 /* tính lương */
@@ -332,18 +317,29 @@ let ot300=num(document.getElementById("ot300")?.value)
 let pc=[...document.querySelectorAll(".pc")]
 .reduce((s,e)=>s+num(e.value),0)
 
-let base=luong/ngay/8
+let base = luong/ngay/8
 
-let ot=base*(ot150*1.5 + ot200*2 + ot300*3)
+let ot = base*(ot150*1.5 + ot200*2 + ot300*3)
 
-let bh=luong*0.105
+let bh = 0
 
-let net=luong + pc + ot - bh
+if(document.getElementById("bhxh").checked){
+bh = luong*0.105
+}
+
+let net = luong + pc + ot - bh
+
+
+document.getElementById("hour").innerText=vnd(base)
 
 document.getElementById("pc").innerText=vnd(pc)
+
 document.getElementById("ot").innerText=vnd(ot)
+
 document.getElementById("bh").innerText=vnd(bh)
+
 document.getElementById("net").innerText=vnd(net)
+
 
 
 let otParts=[]
@@ -355,21 +351,28 @@ if(ot300>0) otParts.push(`${ot300}×3`)
 let f1=""
 
 if(otParts.length>0){
-
 f1=`Tiền OT = (${vnd(luong)} / ${ngay} / 8) × (${otParts.join(" + ")}) = ${vnd(ot)}`
-
 }
 
 document.getElementById("f1").innerText=f1
 
 
-let salaryParts=[vnd(luong)]
 
-if(pc>0) salaryParts.push(vnd(pc))
-if(ot>0) salaryParts.push(vnd(ot))
+let parts=[vnd(luong)]
 
-document.getElementById("f2").innerText=
-`Lương thực lãnh = ${salaryParts.join(" + ")} − ${vnd(bh)} = ${vnd(net)}`
+if(pc>0) parts.push(vnd(pc))
+
+if(ot>0) parts.push(vnd(ot))
+
+let formula=`Lương thực lãnh = ${parts.join(" + ")}`
+
+if(bh>0){
+formula+=` − ${vnd(bh)}`
+}
+
+formula+=` = ${vnd(net)}`
+
+document.getElementById("f2").innerText=formula
 
 }
 
