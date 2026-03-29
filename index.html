@@ -106,17 +106,18 @@ font-size:14px;
 font-weight:600;
 }
 
-.checkbox{
-display:flex;
-align-items:center;
-gap:8px;
-}
-
 .checkbox input{
 width:auto;
 margin:0;
 padding:0;
-}   
+flex-shrink:0;
+}
+
+.checkbox label{
+margin:0;
+line-height:1;
+cursor:pointer;
+}
 
 </style>
 </head>
@@ -157,11 +158,12 @@ oninput="calc()">
 
 <p>Lương 1 giờ: <span id="hour">0</span> đ</p>
 
-<p>Tổng phụ cấp: <span id="pc">0</span> đ</p>
+<p id="pcRow">Tổng phụ cấp: <span id="pc">0</span> đ</p>
 
 <p>Tổng OT: <span id="ot">0</span> đ</p>
 
 <p>BHXH (10.5%): <span id="bh">0</span> đ</p>
+<p class="formula" id="bhDetail"></p>
 
 <p class="big">Lương thực lãnh: <span id="net">0</span> đ</p>
 
@@ -217,7 +219,6 @@ if(n) input.value=n
 }
 
 
-
 /* phụ cấp */
 
 function addIncome(){
@@ -229,7 +230,10 @@ let d=document.createElement("div")
 d.className="row"
 
 d.innerHTML=`
-<input class="pc" placeholder="VD: 500000" oninput="calc()">
+<input class="pc" placeholder="VD: 500000"
+onfocus="unformat(this)"
+onblur="formatMoney(this)"
+oninput="calc()">
 <button class="delete" onclick="removeItem(this)">✖</button>
 `
 
@@ -244,7 +248,6 @@ btn.parentElement.remove()
 calc()
 
 }
-
 
 
 /* OT */
@@ -300,7 +303,6 @@ calc()
 }
 
 
-
 /* tính lương */
 
 function calc(){
@@ -308,7 +310,22 @@ function calc(){
 let luong=num(document.getElementById("luong").value)
 let ngay=num(document.getElementById("ngay").value)
 
-if(!luong || !ngay) return
+if(!luong || !ngay){
+
+document.getElementById("hour").innerText=0
+document.getElementById("pc").innerText=0
+document.getElementById("ot").innerText=0
+document.getElementById("bh").innerText=0
+document.getElementById("net").innerText=0
+
+document.getElementById("f1").innerText=""
+document.getElementById("f2").innerText=""
+document.getElementById("bhDetail").innerText=""
+
+document.getElementById("pcRow").style.display="none"
+
+return
+}
 
 let ot150=num(document.getElementById("ot150").value)
 let ot200=num(document.getElementById("ot200")?.value)
@@ -334,13 +351,13 @@ document.getElementById("hour").innerText=vnd(base)
 
 document.getElementById("pc").innerText=vnd(pc)
 
+document.getElementById("pcRow").style.display = pc>0 ? "block" : "none"
+
 document.getElementById("ot").innerText=vnd(ot)
 
 document.getElementById("bh").innerText=vnd(bh)
 
 document.getElementById("net").innerText=vnd(net)
-
-
 
 let otParts=[]
 
@@ -357,11 +374,9 @@ f1=`Tiền OT = (${vnd(luong)} / ${ngay} / 8) × (${otParts.join(" + ")}) = ${vn
 document.getElementById("f1").innerText=f1
 
 
-
 let parts=[vnd(luong)]
 
 if(pc>0) parts.push(vnd(pc))
-
 if(ot>0) parts.push(vnd(ot))
 
 let formula=`Lương thực lãnh = ${parts.join(" + ")}`
