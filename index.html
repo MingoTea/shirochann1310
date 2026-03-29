@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Máy Tính Lương</title>
+<title>Máy Tính Lương By Mint2807</title>
 
 <style>
 
@@ -158,7 +158,8 @@ oninput="calc()">
 
 <p>Lương 1 giờ: <span id="hour">0</span> đ</p>
 
-<p id="pcRow">Tổng phụ cấp: <span id="pc">0</span> đ</p>
+<!-- FIX 1: ẨN MẶC ĐỊNH -->
+<p id="pcRow" style="display:none">Tổng phụ cấp: <span id="pc">0</span> đ</p>
 
 <p>Tổng OT: <span id="ot">0</span> đ</p>
 
@@ -177,11 +178,8 @@ oninput="calc()">
 <script>
 
 function num(v){
-
 if(!v) return 0
-
 v=v.replace(/\s/g,'')
-
 if(v.includes(',') && v.includes('.')){
 v=v.replace(/\./g,'').replace(',','.')
 }
@@ -191,9 +189,7 @@ v=v.replace(',','.')
 else{
 v=v.replace(/\./g,'')
 }
-
 return parseFloat(v)||0
-
 }
 
 function vnd(v){
@@ -201,34 +197,23 @@ return Math.round(v).toLocaleString("vi-VN")
 }
 
 function formatMoney(input){
-
 let n=num(input.value)
-
 if(n) input.value=vnd(n)
-
 calc()
-
 }
 
 function unformat(input){
-
 let n=num(input.value)
-
 if(n) input.value=n
-
 }
 
 
 /* phụ cấp */
 
 function addIncome(){
-
 let box=document.getElementById("phuCapBox")
-
 let d=document.createElement("div")
-
 d.className="row"
-
 d.innerHTML=`
 <input class="pc" placeholder="VD: 500000"
 onfocus="unformat(this)"
@@ -236,70 +221,47 @@ onblur="formatMoney(this)"
 oninput="calc()">
 <button class="delete" onclick="removeItem(this)">✖</button>
 `
-
 box.appendChild(d)
-
 }
 
 function removeItem(btn){
-
 btn.parentElement.remove()
-
 calc()
-
 }
 
 
 /* OT */
 
 function addOT(){
-
 let box=document.getElementById("otBox")
 
 if(!document.getElementById("ot200")){
-
 let d=document.createElement("div")
-
 d.className="row"
-
 d.innerHTML=`
 <input id="ot200" placeholder="Số giờ OT 200%" oninput="calc()">
 <button class="delete" onclick="removeOT(this)">✖</button>
 `
-
 box.appendChild(d)
-
 return
-
 }
 
 if(!document.getElementById("ot300")){
-
 let d=document.createElement("div")
-
 d.className="row"
-
 d.innerHTML=`
 <input id="ot300" placeholder="Số giờ OT 300%" oninput="calc()">
 <button class="delete" onclick="removeOT(this)">✖</button>
 `
-
 box.appendChild(d)
-
 document.getElementById("addOT").style.display="none"
-
 }
-
 }
 
 function removeOT(btn){
-
 btn.parentElement.remove()
-
 document.getElementById("addOT").style.display="block"
-
 calc()
-
 }
 
 
@@ -311,19 +273,15 @@ let luong=num(document.getElementById("luong").value)
 let ngay=num(document.getElementById("ngay").value)
 
 if(!luong || !ngay){
-
 document.getElementById("hour").innerText=0
 document.getElementById("pc").innerText=0
 document.getElementById("ot").innerText=0
 document.getElementById("bh").innerText=0
 document.getElementById("net").innerText=0
-
 document.getElementById("f1").innerText=""
 document.getElementById("f2").innerText=""
 document.getElementById("bhDetail").innerText=""
-
 document.getElementById("pcRow").style.display="none"
-
 return
 }
 
@@ -335,61 +293,50 @@ let pc=[...document.querySelectorAll(".pc")]
 .reduce((s,e)=>s+num(e.value),0)
 
 let base = luong/ngay/8
-
 let ot = base*(ot150*1.5 + ot200*2 + ot300*3)
 
-let bh = 0
-
-if(document.getElementById("bhxh").checked){
-bh = luong*0.105
-}
+let bh = document.getElementById("bhxh").checked ? luong*0.105 : 0
 
 let net = luong + pc + ot - bh
 
-
 document.getElementById("hour").innerText=vnd(base)
-
 document.getElementById("pc").innerText=vnd(pc)
-
 document.getElementById("pcRow").style.display = pc>0 ? "block" : "none"
-
 document.getElementById("ot").innerText=vnd(ot)
-
 document.getElementById("bh").innerText=vnd(bh)
-
 document.getElementById("net").innerText=vnd(net)
 
-let otParts=[]
+/*
+document.getElementById("bhDetail").innerText =
+document.getElementById("bhxh").checked
+? "→ Tính 10.5% trên lương cơ bản"
+: "→ Không tính BHXH (thử việc / không đóng)"
+*/
 
+let otParts=[]
 if(ot150>0) otParts.push(`${ot150}×1.5`)
 if(ot200>0) otParts.push(`${ot200}×2`)
 if(ot300>0) otParts.push(`${ot300}×3`)
 
-let f1=""
-
-if(otParts.length>0){
-f1=`Tiền OT = (${vnd(luong)} / ${ngay} / 8) × (${otParts.join(" + ")}) = ${vnd(ot)}`
-}
-
-document.getElementById("f1").innerText=f1
-
+document.getElementById("f1").innerText =
+otParts.length>0
+? `Tiền OT = (${vnd(luong)} / ${ngay} / 8) × (${otParts.join(" + ")}) = ${vnd(ot)}`
+: ""
 
 let parts=[vnd(luong)]
-
 if(pc>0) parts.push(vnd(pc))
 if(ot>0) parts.push(vnd(ot))
 
 let formula=`Lương thực lãnh = ${parts.join(" + ")}`
-
-if(bh>0){
-formula+=` − ${vnd(bh)}`
-}
-
+if(bh>0) formula+=` − ${vnd(bh)}`
 formula+=` = ${vnd(net)}`
 
 document.getElementById("f2").innerText=formula
 
 }
+
+/* FIX 2: AUTO RUN */
+window.onload = calc
 
 </script>
 
